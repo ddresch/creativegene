@@ -154,7 +154,7 @@ export default function UploadFiles({ filename, setCId, allowMultipleFile, doEnc
         <>
             {(!allowMultipleFile && cId) && 
                 <img    src={"https://cloudflare-ipfs.com/ipfs/" + cId} 
-                        width="100"
+                        width="250"
                 />
             }
             
