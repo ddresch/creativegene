@@ -65,7 +65,6 @@ const buildPreviewHtml = (previewData:any) => {
         </body>
         </html>
     `
-    console.log(html)
     return html
 }
 
