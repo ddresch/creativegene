@@ -8,7 +8,7 @@ const buildPreviewHtml = (previewData:any) => {
             <meta name="description" content="${description}" />         
             <style>
                 body { margin: 0; padding: 0; background-color: black; }
-                img { width: 100% }
+                img { width: 100%; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); -ms-transform: translate(-50%, -50%); -webkit-transform: translate(-50%, -50%); }
                 .navi { position: fixed; bottom: 0; left: 0; right: 0; background: rgb(244, 244, 244); display: flex; justify-content: space-between; padding: 10px; }
                 .navi a { cursor: pointer; color: black; text-decoration: none; font-size: 14px; font-weight: bold; }
             </style>
@@ -26,11 +26,11 @@ const buildPreviewHtml = (previewData:any) => {
                 const baseUrl = 'https://ipfs.io/ipfs/' + cId + '/'
                 const openDownloadPage = () => {
                     const cid = baseUrl.replace('https://ipfs.io/ipfs/','') 
-                    window.location.href = 'https://creativegene.xyz/download?cid=' + cid
+                    window.open('https://creativegene.xyz/download/' + cid, '_blank')
                 }
                 const openRefererPage = () => {
                     const cid = baseUrl.replace('https://ipfs.io/ipfs/','')
-                    window.location.href = 'https://creativegene.xyz/referer?cid=' + cid
+                    window.open('https://creativegene.xyz/referer/' + cid, '_blank')
                 }
                 const hideAllImgs = (imgs) => {
                     for (let i = 0; i < imgs.length; i++) {
