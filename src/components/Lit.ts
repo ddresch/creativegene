@@ -5,7 +5,11 @@ import * as LitJsSdk from 'lit-js-sdk'
 const litNodeClient = new LitJsSdk.LitNodeClient();
 litNodeClient.connect();
 
-const litProcess = async () => {
+interface IEncryptPackage {
+  contractAddress: string;
+}
+
+const EncryptPackage = async ({contractAddress}:IEncryptPackage) => {
 
     const messageToEncrypt = "monoape monkey test";
 
@@ -13,11 +17,9 @@ const litProcess = async () => {
 
     const authSig = await LitJsSdk.checkAndSignAuthMessage({chain})
 
-// https://rinkeby.etherscan.io/address/0x8b2f576a35791b7ec45fa57ce8ccb2cfb798a0f2
-
     const accessControlConditions = [
         {
-            "contractAddress": "0x8b2f576a35791b7ec45fa57ce8ccb2cfb798a0f2",
+            "contractAddress": contractAddress,
             "standardContractType": "ERC721",
             "chain": chain,
             "method": "balanceOf",
@@ -69,4 +71,4 @@ const litProcess = async () => {
     console.warn("decryptedString:", decryptedString);   
 }
 
-export default litProcess
+export default EncryptPackage

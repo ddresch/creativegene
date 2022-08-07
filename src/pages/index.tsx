@@ -1,9 +1,7 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { ConnectButton } from '@rainbow-me/rainbowkit'
 import type { NextPage } from 'next'
 import { useAccount } from 'wagmi'
-import litProcess from '../components/Lit'
-import UploadFiles from '../components/UploadFiles'
 import CreateGene from '../components/CreateGene'
 
 const Home: NextPage = () => {
@@ -20,16 +18,6 @@ const Home: NextPage = () => {
             <ConnectButton />
 
             {isConnected && (<>
-              <button
-                style={{ marginTop: 24 }}
-                className="button"
-                onClick={async () => {
-                  await litProcess()
-                }}
-              >
-                Lit Test
-              </button>
-              <UploadFiles />
               <CreateGene />
             </>)}
           </div>
