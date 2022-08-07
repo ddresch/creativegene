@@ -22,7 +22,8 @@ const buildPreviewHtml = (previewData:any) => {
             </div>
             <script type="text/javascript">
                 let currentImg = 0
-                const baseUrl = window.location.href.replace('#', '')
+                const cId = window.location.href.split('/')[4]
+                const baseUrl = 'https://ipfs.io/ipfs/' + cId + '/'
                 const openDownloadPage = () => {
                     const cid = baseUrl.replace('https://ipfs.io/ipfs/','') 
                     window.location.href = 'https://creativegene.xyz/download?cid=' + cid
