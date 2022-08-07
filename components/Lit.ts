@@ -62,22 +62,19 @@ interface IDecryptPackage {
 }
 
 export const DecryptPackage = async ({cId}:IDecryptPackage) => {
-
-  // -- init litNodeClient
-  const litNodeClient = new LitJsSdk.LitNodeClient();
-  await litNodeClient.connect();
-
+  const litNodeClient = new LitJsSdk.LitNodeClient()
+  await litNodeClient.connect()
   const authSig = await LitJsSdk.checkAndSignAuthMessage({chain})
 
   // first download decryption package
   const response = await fetch(`https://ipfs.io/ipfs/${cId}/creativegene.zip.json`)  
   const keys = await response.json()
-  console.log('keys:', keys)
-  // 3. Decrypt it
-  // <String> toDecrypt
-  const toDecrypt = LitJsSdk.uint8arrayToString(Uint8Array.from(keys.encryptedSymmetricKey), 'base16')
-  console.log("toDecrypt:", toDecrypt)
 
+  // <String> toDecrypt
+  const toDecrypt = await LitJsSdk.uint8arrayToString(
+    Uint8Array.from(Object.values(keys.encryptedSymmetricKey)
+  ), 'base16')
+  
   // <Uint8Array(32)> _symmetricKey 
   const symmetricKey = await litNodeClient.getEncryptionKey({
     accessControlConditions: keys.accessControlConditions,
@@ -91,12 +88,13 @@ export const DecryptPackage = async ({cId}:IDecryptPackage) => {
   const fileResponse = await fetch(`https://ipfs.io/ipfs/${cId}/creativegene.zip`)
   const file = await fileResponse.blob()
 
-  const { decryptedFile } = await LitJsSdk.decryptFile({
+  const decryptedFile = await LitJsSdk.decryptFile({
     file,
     symmetricKey
   })
 
   console.warn("decryptedFile:", decryptedFile)
+  return decryptedFile
 }
 
 export default EncryptPackage
