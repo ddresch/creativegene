@@ -77,11 +77,18 @@ export default function UploadFiles({ filename, setCId, allowMultipleFile, doEnc
                     const blob = new Blob([arrayBuffer], {type : getMimeType(filename)}) // todo: get mime type from file
                     // check if we need to encrypt the file
                     if(doEncrypt && encryptForContract) {
-                        const encryptedBlob = await EncryptPackage({
+                        const encryptedPackage = await EncryptPackage({
                             contractAddress: encryptForContract,
                             packageBlob: blob
                         })
-                        files.push(new File([encryptedBlob], replaceFileIndex(filename, files.length)))
+                        files.push(new File([encryptedPackage.encryptedFile], replaceFileIndex(filename, files.length)))
+                        // also store encryption keys on IPFS
+                        const fileJson = JSON.stringify({
+                            encryptedSymmetricKey: encryptedPackage.encryptedSymmetricKey,
+                            accessControlConditions: encryptedPackage.accessControlConditions,
+                        })
+                        console.log('fileJson', fileJson)
+                        files.push(new File([fileJson], replaceFileIndex(filename + '.json', files.length)))
                     }else{
                         files.push(new File([blob], replaceFileIndex(filename, files.length)))
                     }                    

@@ -1,9 +1,7 @@
 // @ts-ignore
 import * as LitJsSdk from 'lit-js-sdk'
 
-// -- init litNodeClient
-const litNodeClient = new LitJsSdk.LitNodeClient();
-litNodeClient.connect();
+const chain = 'rinkeby';
 
 interface IEncryptPackage {
   contractAddress: string;
@@ -11,10 +9,10 @@ interface IEncryptPackage {
 }
 
 const EncryptPackage = async ({contractAddress, packageBlob}:IEncryptPackage) => {
+    // -- init litNodeClient
+    const litNodeClient = new LitJsSdk.LitNodeClient();
+    await litNodeClient.connect();
 
-    // const messageToEncrypt = "monoape monkey test";
-
-    const chain = 'rinkeby';
 
     const authSig = await LitJsSdk.checkAndSignAuthMessage({chain})
 
@@ -32,7 +30,6 @@ const EncryptPackage = async ({contractAddress, packageBlob}:IEncryptPackage) =>
     // 1. Encryption
     // <Blob> encryptedString
     // <Uint8Array(32)> symmetricKey 
-    // const { encryptedString, symmetricKey } = await LitJsSdk.encryptString(messageToEncrypt);
     const { encryptedFile, symmetricKey } = await LitJsSdk.encryptFile({
       file: packageBlob
     })
@@ -49,31 +46,57 @@ const EncryptPackage = async ({contractAddress, packageBlob}:IEncryptPackage) =>
     })
     
     console.warn("encryptedSymmetricKey:", encryptedSymmetricKey)
-    console.warn("encryptedFile:", encryptedFile)
+    console.warn("encryptedFile:", encryptedFile)  
+    
+    const packagedData = {
+      encryptedFile,
+      encryptedSymmetricKey,
+      accessControlConditions,
+    }
 
-    // // 3. Decrypt it
-    // // <String> toDecrypt
-    // const toDecrypt = LitJsSdk.uint8arrayToString(encryptedSymmetricKey, 'base16');
-    // console.log("toDecrypt:", toDecrypt);
+    return packagedData
+}
 
-    // // <Uint8Array(32)> _symmetricKey 
-    // const _symmetricKey = await litNodeClient.getEncryptionKey({
-    //   accessControlConditions,
-    //   toDecrypt,
-    //   chain,
-    //   authSig
-    // })
+interface IDecryptPackage {
+  cId: string;
+}
 
-    // console.warn("_symmetricKey:", _symmetricKey);
+export const DecryptPackage = async ({cId}:IDecryptPackage) => {
 
-    // // <String> decryptedString
-    // const decryptedString = await LitJsSdk.decryptString(
-    //   encryptedString,
-    //   symmetricKey
-    // );
+  // -- init litNodeClient
+  const litNodeClient = new LitJsSdk.LitNodeClient();
+  await litNodeClient.connect();
 
-    // console.warn("decryptedString:", decryptedString);   
-    return encryptedFile
+  const authSig = await LitJsSdk.checkAndSignAuthMessage({chain})
+
+  // first download decryption package
+  const response = await fetch(`https://ipfs.io/ipfs/${cId}/creativegene.zip.json`)  
+  const keys = await response.json()
+  console.log('keys:', keys)
+  // 3. Decrypt it
+  // <String> toDecrypt
+  const toDecrypt = LitJsSdk.uint8arrayToString(Uint8Array.from(keys.encryptedSymmetricKey), 'base16')
+  console.log("toDecrypt:", toDecrypt)
+
+  // <Uint8Array(32)> _symmetricKey 
+  const symmetricKey = await litNodeClient.getEncryptionKey({
+    accessControlConditions: keys.accessControlConditions,
+    toDecrypt,
+    chain,
+    authSig
+  })
+
+  console.warn("_symmetricKey:", symmetricKey)
+
+  const fileResponse = await fetch(`https://ipfs.io/ipfs/${cId}/creativegene.zip`)
+  const file = await fileResponse.blob()
+
+  const { decryptedFile } = await LitJsSdk.decryptFile({
+    file,
+    symmetricKey
+  })
+
+  console.warn("decryptedFile:", decryptedFile)
 }
 
 export default EncryptPackage

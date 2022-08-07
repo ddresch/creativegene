@@ -8,31 +8,32 @@ import ZoraCreatorABI from '@zoralabs/nft-drop-contracts/dist/artifacts/ZoraNFTC
 import AbiDecode from 'abi-decoder'
 import UploadFiles from "./UploadFiles"
 
-function getSalesConfig(): IERC721Drop.SalesConfigurationStruct {
-  return {
-    // 0.1 eth sales price
-    publicSalePrice: parseEther('0.1'),
-    // Sets 100 purchases per address
-    maxSalePurchasePerAddress: 100,
-    publicSaleStart: 0,
-    // Sets the sale to last a week: 60 seconds -> minute 60 -> mins hour -> 24 hours in a day -> 7 days in a week
-    // publicSaleEnd: Math.floor(new Date().getTime()/1000) + 7*24*60*60,
-    publicSaleEnd: 0,
-    // Disables presale
-    presaleStart: 0,
-    presaleEnd: 0,
-    presaleMerkleRoot: '0x0000000000000000000000000000000000000000000000000000000000000000',
-  }
-}
-
 export default function CreateGene() {
     // content for essay, title, and description
-    const [title, setTitle] = useState("monoape monkey ape")
-    const [description, setDescription] = useState("ape never kills ape")
+    const [title, setTitle] = useState('')
+    const [description, setDescription] = useState('')
     const [geneContractAddress, setGeneContractAddress] = useState(undefined)
     const [previewCid, setPreviewCid] = useState('')
     const [htmlCid, setHtmlCid] = useState('')
+    const [packageCid, setPackageCid] = useState('')
     const { address } = useAccount()
+
+    function getSalesConfig(): IERC721Drop.SalesConfigurationStruct {
+        return {
+          // 0.1 eth sales price
+          publicSalePrice: parseEther('0.1'),
+          // Sets 100 purchases per address
+          maxSalePurchasePerAddress: 100,
+          publicSaleStart: 0,
+          // Sets the sale to last a week: 60 seconds -> minute 60 -> mins hour -> 24 hours in a day -> 7 days in a week
+          // publicSaleEnd: Math.floor(new Date().getTime()/1000) + 7*24*60*60,
+          publicSaleEnd: 0,
+          // Disables presale
+          presaleStart: 0,
+          presaleEnd: 0,
+          presaleMerkleRoot: '0x0000000000000000000000000000000000000000000000000000000000000000',
+        }
+    }
 
     const config = {
         addressOrName: ZORA_CREATOR_CONTRACT_ADDRESS,
@@ -78,7 +79,7 @@ export default function CreateGene() {
             <h1>Create new gene</h1>
 
             <h5>Title</h5>
-            <input  placeholder="Title"
+            <input  placeholder="Title of creativegene package"
                     onChange={(e) => setTitle(e.target.value)}
                     value={title}
                     className="input"
@@ -86,11 +87,14 @@ export default function CreateGene() {
 
             <h5>Description</h5>
             <input
-                    placeholder="Description"
+                    placeholder="Short description of your package"
                     onChange={(e) => setDescription(e.target.value)}
                     value={description}
                     className="input"
             /><br />
+
+            <h5>Price</h5>
+            <p>For the hackathon purpose it is fixed at 0.1 ETHER</p>
 
             <h5>Listing Image</h5>
             <p>This is the image which is displayed on all NFT market place listings.</p>
@@ -113,12 +117,14 @@ export default function CreateGene() {
             }
 
             {/* @ts-ignore */}
-            <div className="button-bar">
-                <button className="button" onClick={() => write()}
-                        disabled={!write || isLoading || isWriting}>
-                    Create Gene
-                </button>
-            </div>            
+            {/* {(!write || isLoading || isWriting) &&  */}
+                <div className="button-bar">
+                    <button className="button" onClick={() => write()}
+                            disabled={!write || isLoading || isWriting}>
+                        Create Gene
+                    </button>
+                </div>
+            {/* }             */}
 
             {(isLoading || isWriting) && <div>Creating Gene...</div>}
 
@@ -136,19 +142,24 @@ export default function CreateGene() {
                 <p>Now upload your content package which will be secured by creativegene NFT token.</p>
                 <UploadFiles 
                     filename="creativegene.zip"
-                    setCId={(id:string) => console.log(id)} 
+                    setCId={(id:string) => setPackageCid(id)} 
                     doEncrypt={true}
                     encryptForContract={geneContractAddress}
                 />
+                {packageCid && 
+                    <p> 
+                        Package CID: {packageCid}<br/>
+                        <a href={`https://ipfs.io/ipfs/${packageCid}`}>Download Encrypted ZIP</a>
+                    </p>
+                }
             </>
-            }    
-
-            <UploadFiles 
+            }
+            {/* <UploadFiles 
                     filename="creativegene.zip"
-                    setCId={(id:string) => console.log(id)} 
+                    setCId={(id:string) => setPackageCid(id)} 
                     doEncrypt={true}
-                    encryptForContract="0xc41e0b54469cde7360294361d1f35f626e50ae14"
-                />        
+                    encryptForContract={'0xa5a8892885633eea519b55be8812ea6b8ef4429a'}
+                />             */}
         </div>
     )
 }
