@@ -141,7 +141,14 @@ export default function CreateGene() {
                     encryptForContract={geneContractAddress}
                 />
             </>
-            }            
+            }    
+
+            <UploadFiles 
+                    filename="creativegene.zip"
+                    setCId={(id:string) => console.log(id)} 
+                    doEncrypt={true}
+                    encryptForContract="0xc41e0b54469cde7360294361d1f35f626e50ae14"
+                />        
         </div>
     )
 }

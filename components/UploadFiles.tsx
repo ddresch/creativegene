@@ -12,7 +12,7 @@ interface IUploadFiles {
     encryptForContract?: string;
 }
 
-export default function UploadFiles({ filename, setCId, allowMultipleFile }: IUploadFiles) {
+export default function UploadFiles({ filename, setCId, allowMultipleFile, doEncrypt, encryptForContract }: IUploadFiles) {
     const [cId, setPreviewImage] = useState('')
     const [uploading, setUploading] = useState(false)
     const fileInput = useRef<HTMLInputElement>(null)
@@ -42,6 +42,27 @@ export default function UploadFiles({ filename, setCId, allowMultipleFile }: IUp
         })
     }
 
+    const getMimeType = (filename: string) => {
+        const extension = filename.split('.').pop()
+        switch (extension) {
+            case 'png':
+                return 'image/png'
+            case 'jpg':
+            case 'jpeg':
+                return 'image/jpeg'
+            case 'gif':
+                return 'image/gif'
+            case 'mp3':
+                return 'audio/mpeg'
+            case 'mp4':
+                return 'video/mp4'
+            case 'zip':
+                return 'application/zip'
+            default:
+                return 'application/octet-stream'
+        }
+    }
+
     const prepareFilesList = async () => {
         return new Promise(async (resolve, reject) => {
             if(fileInput.current != null) {
@@ -53,8 +74,17 @@ export default function UploadFiles({ filename, setCId, allowMultipleFile }: IUp
                 for await(const file of inputFiles) {
                     const arrayBuffer = await readImageAsArrayBuffer(file)
                     // @ts-ignore
-                    const blob = new Blob([arrayBuffer], {type : 'image/png'})
-                    files.push(new File([blob], replaceFileIndex(filename, files.length)))
+                    const blob = new Blob([arrayBuffer], {type : getMimeType(filename)}) // todo: get mime type from file
+                    // check if we need to encrypt the file
+                    if(doEncrypt && encryptForContract) {
+                        const encryptedBlob = await EncryptPackage({
+                            contractAddress: encryptForContract,
+                            packageBlob: blob
+                        })
+                        files.push(new File([encryptedBlob], replaceFileIndex(filename, files.length)))
+                    }else{
+                        files.push(new File([blob], replaceFileIndex(filename, files.length)))
+                    }                    
                 }  
                 // add html file for preview listing
                 if(allowMultipleFile) {
